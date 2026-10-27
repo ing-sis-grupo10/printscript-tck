@@ -8,26 +8,12 @@ import interpreter.PrintScriptLinter;
 import printscript.analyzer.AnalyzerRules;
 import printscript.analyzer.AnalyzerRulesLoader;
 import printscript.analyzer.PrintScriptAnalyzer;
+import printscript.common.Version;
 import printscript.common.result.Failure;
 import printscript.common.result.Result;
-import printscript.interpreter.handler.AssignmentHandler;
-import printscript.interpreter.handler.HandlerRegistry;
-import printscript.interpreter.handler.IfStatementHandler;
-import printscript.interpreter.handler.PrintlnStatementHandler;
-import printscript.interpreter.handler.StatementHandler;
-import printscript.interpreter.handler.VariableDeclarationHandler;
-import printscript.interpreter.runtime.Environment;
-import printscript.interpreter.runtime.ExpressionEvaluator;
-import printscript.interpreter.runtime.GlobalEnvironment;
-import printscript.interpreter.runtime.InputSource;
-import printscript.lexer.PrintScriptLexer;
-import printscript.parser.AssignmentParser;
-import printscript.parser.IfStatementParser;
-import printscript.parser.PrecedenceClimbingExpressionParser;
-import printscript.parser.PrintScriptParser;
-import printscript.parser.PrintlnStatementParser;
-import printscript.parser.StatementParser;
-import printscript.parser.VariableDeclarationParser;
+import printscript.interpreter.InterpreterFactory;
+import printscript.lexer.LexerFactory;
+import printscript.parser.ParserFactory;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,8 +22,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MyPrintScriptLinter implements PrintScriptLinter {
 
@@ -46,33 +30,15 @@ public class MyPrintScriptLinter implements PrintScriptLinter {
         JsonObject original = JsonParser.parseReader(new InputStreamReader(config, StandardCharsets.UTF_8)).getAsJsonObject();
         AnalyzerRules rules = new AnalyzerRulesLoader().load(new StringReader(translate(original).toString()));
 
+        Version languageVersion = Version.from(version);
         Reader reader = new InputStreamReader(src, StandardCharsets.UTF_8);
-        InputSource inputSource = prompt -> prompt;
-
-        List<StatementParser> statementParsers = new ArrayList<>();
-        statementParsers.add(new VariableDeclarationParser());
-        statementParsers.add(new AssignmentParser());
-        statementParsers.add(new PrintlnStatementParser());
-        statementParsers.add(new IfStatementParser(() -> statementParsers));
-
-        var parser = new PrintScriptParser(
-                new PrintScriptLexer(reader, version),
-                statementParsers,
-                new PrecedenceClimbingExpressionParser());
-
-        var evaluator = new ExpressionEvaluator(inputSource);
         PrintStream silentOut = new PrintStream(OutputStream.nullOutputStream());
-        List<StatementHandler> statementHandlers = new ArrayList<>();
-        HandlerRegistry handlers = new HandlerRegistry(statementHandlers);
-        statementHandlers.add(new VariableDeclarationHandler(evaluator));
-        statementHandlers.add(new AssignmentHandler(evaluator));
-        statementHandlers.add(new PrintlnStatementHandler(evaluator, silentOut));
-        statementHandlers.add(new IfStatementHandler(evaluator, () -> handlers));
 
-        Environment environment = new GlobalEnvironment();
-        var interpreter = new printscript.interpreter.PrintScriptInterpreter(parser, environment, handlers);
-
+        var tokens = LexerFactory.create(reader, languageVersion);
+        var statements = ParserFactory.create(tokens, languageVersion);
+        var interpreter = InterpreterFactory.create(statements, languageVersion, silentOut, prompt -> prompt);
         var analyzer = new PrintScriptAnalyzer(interpreter, rules);
+
         while (analyzer.hasNext()) {
             Result<?> result = analyzer.next();
             if (result instanceof Failure<?> failure) {

@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import printscript.common.Version;
 
 public class MyPrintScriptFormatter implements PrintScriptFormatter {
 
@@ -24,7 +25,7 @@ public class MyPrintScriptFormatter implements PrintScriptFormatter {
         FormattingRules rules = new FormattingRulesLoader().load(new StringReader(translated.toString()));
 
         Reader srcReader = new InputStreamReader(src, StandardCharsets.UTF_8);
-        new printscript.formatter.PrintScriptFormatter(rules).format(srcReader, writer, version);
+        new printscript.formatter.PrintScriptFormatter(rules).format(srcReader, writer, Version.from(version));
     }
 
     private JsonObject translate(JsonObject original) {

@@ -27,13 +27,13 @@ test {
 }
 
 dependencies {
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-common:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-ast:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-lexer:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-parser:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-interpreter:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-formatter:1.1.1'
-    implementation 'ar.edu.austral.ingsis.printscript:printscript-analyzer:1.1.1'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-common:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-ast:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-lexer:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-parser:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-interpreter:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-formatter:2.0.0'
+    implementation 'ar.edu.austral.ingsis.printscript:printscript-analyzer:2.0.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'junit:junit:4.13.1'
 }
